@@ -1,103 +1,110 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useAuthStore } from '@/store/authStore';
+import AuthLayout from '@/components/layout/AuthLayout';
+import { Eye, EyeOff, X, Mail, Lock } from 'lucide-react';
+
+export default function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState({ email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
+  const login = useAuthStore((state) => state.login);
+
+  const validate = () => {
+    const newErrors = { email: '', password: '' };
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!email) {
+      newErrors.email = '아이디(이메일)를 입력해주세요.';
+    } else if (!emailRegex.test(email)) {
+      newErrors.email = '아이디는 이메일 형식으로 입력해주세요.';
+    }
+    
+    if (!password) {
+      newErrors.password = '비밀번호를 입력해주세요.';
+    }
+    
+    setErrors(newErrors);
+    return !newErrors.email && !newErrors.password;
+  };
+
+  const handleLogin = () => {
+    if (!validate()) return;
+    const ADMIN_EMAIL = 'admin@test.com';
+    const ADMIN_PASSWORD = 'password123';
+
+    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+      login();
+      router.push('/calendar');
+    } else {
+      setErrors({ email: '아이디 또는 비밀번호가 일치하지 않습니다.', password: '' });
+    }
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <AuthLayout>
+      <div className="flex w-full mb-8">
+        <div className="flex-1 text-center font-bold text-lg border-b-2 border-sky-500 text-sky-500 py-2">
+          로그인
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+        <Link href="/signup" className="flex-1 text-center font-bold text-lg text-gray-400 py-2 hover:text-gray-600 transition-colors">
+          회원가입
+        </Link>
+      </div>
+
+      <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
+        <div className="relative flex items-center border-b-2 p-2 mb-4 focus-within:border-sky-500 transition-colors">
+          <Mail className="text-gray-400 mr-3 shrink-0" size={20} />
+          <input
+            id="email" type="email" placeholder="아이디(이메일)"
+            className="w-full focus:outline-none bg-transparent"
+            value={email} onChange={(e) => setEmail(e.target.value)}
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
+          {email && (
+            <button type="button" onClick={() => setEmail('')} className="text-gray-400 hover:text-gray-600">
+              <X size={20} />
+            </button>
+          )}
+        </div>
+        {errors.email && <p className="text-red-500 text-xs mb-4">{errors.email}</p>}
+
+        <div className="relative flex items-center border-b-2 p-2 mb-6 focus-within:border-sky-500 transition-colors">
+          <Lock className="text-gray-400 mr-3 shrink-0" size={20} />
+          <input
+            id="password" type={showPassword ? 'text' : 'password'} placeholder="비밀번호"
+            className="w-full focus:outline-none bg-transparent"
+            value={password} onChange={(e) => setPassword(e.target.value)}
           />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+          <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-gray-400 hover:text-gray-600">
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
+        </div>
+        {errors.password && <p className="text-red-500 text-xs mb-4">{errors.password}</p>}
+
+        <button
+          onClick={handleLogin} type="button"
+          className="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition-colors text-lg"
         >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          로그인
+        </button>
+        
+       
+        <div className="text-right mt-4 text-sm text-gray-500 space-x-2">
+          <Link href="/find-id" className="hover:text-sky-500">
+            아이디 찾기
+          </Link>
+          <span>|</span>
+          <Link href="/find-password" className="hover:text-sky-500">
+            비밀번호 찾기
+          </Link>
+        </div>
+        
+      </form>
+    </AuthLayout>
   );
 }
