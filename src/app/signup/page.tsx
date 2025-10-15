@@ -32,7 +32,6 @@ export default function SignupPage() {
     setPasswordValidations({ length, combination, consecutive, includesEmail });
   }, [password, email]);
 
-
   const handleCheckEmail = () => {
     if (email === 'admin@test.com') {
       setErrors({ ...errors, email: '이미 사용 중인 이메일입니다.' });
@@ -48,7 +47,27 @@ export default function SignupPage() {
   };
 
   const handleSignup = () => {
-    // 실제 회원가입 로직
+    const newErrors = { email: '', password: '', passwordConfirm: '', nickname: '' };
+
+    const nicknameRegex = /^[a-zA-Z가-힣]+$/;
+    const profanityList = ['바보', '멍청이', 'xx'];
+
+    if (nickname.length < 2 || nickname.length > 20) {
+      newErrors.nickname = '이름은 2글자 이상 20글자 이하로 입력해주세요.';
+    } else if (!nicknameRegex.test(nickname)) {
+      newErrors.nickname = '이름에는 특수문자나 숫자를 사용할 수 없습니다.';
+    } else if (profanityList.some(word => nickname.includes(word))) {
+      newErrors.nickname = '사용할 수 없는 단어가 포함되어 있습니다.';
+    }
+
+    if (!isEmailChecked) newErrors.email = '이메일 중복 확인을 해주세요.';
+    if (password !== passwordConfirm) newErrors.passwordConfirm = '비밀번호가 일치하지 않습니다.';
+
+    setErrors(newErrors);
+
+    if (Object.values(newErrors).every(error => error === '')) {
+      alert('회원가입 성공! (아직 서버에 저장되지는 않습니다)');
+    }
   };
 
   return (
@@ -63,18 +82,14 @@ export default function SignupPage() {
       </div>
 
       <form onSubmit={(e) => { e.preventDefault(); handleSignup(); }}>
-        <div className="flex items-center border-b-2 p-2 mb-4 focus-within:border-sky-500 transition-colors">
+        <div className="flex items-center border-b-2 p-2 focus-within:border-sky-500 transition-colors">
             <Mail className="text-gray-400 mr-3 shrink-0" size={20} />
             <input id="email" type="email" value={email} onChange={(e) => { setEmail(e.target.value); setIsEmailChecked(false); }} placeholder="아이디(이메일)" className="flex-grow focus:outline-none bg-transparent w-full"/>
-            {isEmailChecked ? (
-              <CheckCircle2 className="text-green-500" />
-            ) : (
-              <button type="button" onClick={handleCheckEmail} className="text-sm bg-gray-200 text-gray-600 font-semibold py-1 px-2 rounded-md hover:bg-gray-300 whitespace-nowrap">중복확인</button>
-            )}
+            {isEmailChecked ? <CheckCircle2 className="text-green-500" /> : <button type="button" onClick={handleCheckEmail} className="text-sm bg-gray-200 text-gray-600 font-semibold py-1 px-2 rounded-md hover:bg-gray-300 whitespace-nowrap">중복확인</button>}
         </div>
-        {errors.email && <p className="text-red-500 text-xs mb-4">{errors.email}</p>}
+        {errors.email && <p className="text-red-500 text-xs mt-1 mb-3">{errors.email}</p>}
 
-        <div className="flex items-center border-b-2 p-2 focus-within:border-sky-500 transition-colors">
+        <div className="flex items-center border-b-2 p-2 mt-4 focus-within:border-sky-500 transition-colors">
             <Lock className="text-gray-400 mr-3 shrink-0" size={20} />
             <input id="password" type="password" placeholder="비밀번호" onFocus={() => setIsPasswordFocused(true)} onBlur={() => setIsPasswordFocused(false)} value={password} onChange={(e) => setPassword(e.target.value)} className="w-full focus:outline-none bg-transparent"/>
         </div>
@@ -85,7 +100,7 @@ export default function SignupPage() {
               <p className={passwordValidations.consecutive ? 'text-green-500' : ''}>✓ 3개 이상 연속되거나 동일한 문자/숫자 제외</p>
               <p className={passwordValidations.includesEmail ? 'text-green-500' : ''}>✓ 아이디(이메일) 제외</p>
             </div>
-        ) : <div className="h-4 mb-4"></div>}
+        ) : <div className="h-4 my-4"></div>}
         
         <div className="flex items-center border-b-2 p-2 focus-within:border-sky-500 transition-colors">
             <Lock className="text-gray-400 mr-3 shrink-0" size={20} />
@@ -93,10 +108,11 @@ export default function SignupPage() {
         </div>
         {passwordConfirm ? (password === passwordConfirm ? <p className="text-green-500 text-xs my-4">비밀번호가 일치합니다.</p> : <p className="text-red-500 text-xs my-4">비밀번호가 일치하지 않습니다.</p>) : <p className="text-gray-500 text-xs my-4">확인을 위해 비밀번호를 다시 입력해주세요.</p>}
         
-        <div className="flex items-center border-b-2 p-2 mb-8 focus-within:border-sky-500 transition-colors">
+        <div className="flex items-center border-b-2 p-2 focus-within:border-sky-500 transition-colors">
             <User className="text-gray-400 mr-3 shrink-0" size={20} />
             <input id="nickname" type="text" placeholder="이름(닉네임)" value={nickname} onChange={(e) => setNickname(e.target.value)} className="w-full focus:outline-none bg-transparent"/>
         </div>
+        {errors.nickname ? <p className="text-red-500 text-xs mt-1 mb-8">{errors.nickname}</p> : <div className="mb-8"></div>}
         
         <button type="submit" className="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition-colors text-lg">
           회원가입
