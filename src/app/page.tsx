@@ -40,7 +40,7 @@ export default function LoginPage() {
 
     if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
       login();
-      router.push('/calendar');
+      router.push('/diary/write');
     } else {
       setErrors({ email: '아이디 또는 비밀번호가 일치하지 않습니다.', password: '' });
     }
@@ -91,19 +91,7 @@ export default function LoginPage() {
           className="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition-colors text-lg"
         >
           로그인
-        </button>
-        
-       
-        <div className="text-right mt-4 text-sm text-gray-500 space-x-2">
-          <Link href="/find-id" className="hover:text-sky-500">
-            아이디 찾기
-          </Link>
-          <span>|</span>
-          <Link href="/find-password" className="hover:text-sky-500">
-            비밀번호 찾기
-          </Link>
-        </div>
-        
+        </button>    
       </form>
     </AuthLayout>
   );
